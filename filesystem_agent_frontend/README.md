@@ -18,6 +18,8 @@ In the project directory, you can run:
 Runs the app in development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
+If you access the dev server via a remote hostname/IP, Docker, or a tunneling URL and see “Invalid Host header”, see the section below on resolving host header checks.
+
 ### `npm test`
 
 Launches the test runner in interactive watch mode.
@@ -26,6 +28,47 @@ Launches the test runner in interactive watch mode.
 
 Builds the app for production to the `build` folder.\
 It correctly bundles React in production mode and optimizes the build for the best performance.
+
+## Fix: "Invalid Host header" when accessing remotely (Docker/tunnel/IP)
+
+Create React App uses Webpack Dev Server which validates the `Host` header. When accessing the dev server via a non-localhost host (e.g., an IP, Docker bridge, or a tunneling URL), you may encounter:
+
+```
+Invalid Host header
+```
+
+Use one of the options below in development:
+
+- Recommended: Allow specific hosts
+  1. Copy `.env.example` to `.env.development.local`.
+  2. Set `ALLOWED_HOSTS` to include the hostnames you use, and bind to `0.0.0.0`:
+     ```
+     ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+     HOST=0.0.0.0
+     PORT=3000
+     ```
+     Add additional hosts (e.g., your tunnel domain) to the comma-separated list as needed.
+
+- Fallback (tunnels/unknown hosts): Disable host check (development only)
+  1. In `.env.development.local`, set:
+     ```
+     DANGEROUSLY_DISABLE_HOST_CHECK=true
+     HOST=0.0.0.0
+     PORT=3000
+     ```
+  2. Restart `npm start`.
+  WARNING: Use only in local development, not in production.
+
+CRA reads these variables automatically; no code changes are required. This repository already includes a `.env.example` with these fields.
+
+## Backend proxy
+
+The app is configured with `"proxy": "http://localhost:3001"` in `package.json`. In development:
+- Frontend requests to `/api/...` will be proxied to the backend (adjust `REACT_APP_API_BASE_URL` if you prefer absolute URLs).
+- To target a different backend, create `.env.development.local` with:
+  ```
+  REACT_APP_API_BASE_URL=http://<backend-host>:3001/api
+  ```
 
 ## Customization
 

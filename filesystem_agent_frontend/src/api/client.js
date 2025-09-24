@@ -4,8 +4,14 @@ import axios from "axios";
  * API client configured for backend integration.
  * Uses relative path so the dev server can proxy or serve directly if hosted together.
  */
+const apiBase =
+  // Prefer explicit runtime env variable injected by CRA build (if provided)
+  (typeof process !== "undefined" && process.env && process.env.REACT_APP_API_BASE_URL) ||
+  // Fallback to same-origin "/api" which works with CRA proxy or when backend is mounted under the same host
+  "/api";
+
 const api = axios.create({
-  baseURL: "/api",
+  baseURL: apiBase,
   timeout: 20000,
 });
 
